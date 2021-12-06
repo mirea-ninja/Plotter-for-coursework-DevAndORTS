@@ -171,7 +171,23 @@ distToLeftAndRightBoundaries = 0.5;
 distToRightBoundary = 5 * tau * 1000;
 ```
 
+Присвойте переменной `distToRightBoundary` формулу из курсовой или собственное значение для правой границы графика.
 
+```matlab
+distToRightBoundary = (tPulse + 5 * tau) * 1000;
+```
+
+Измените формулу после `y(1, i) =` для вашего Uвх.
+
+```matlab
+y(1, i) = -8 * s2Formula(t) / tPulse^2 + 4 * s1Formula(t) / tPulse + 8 * s2Formula(t - tPulse) / tPulse^2 + 4 * s1Formula(t - tPulse) / tPulse;
+```
+
+Измените формулу после `y(2, i) =` для вашего Uвых.
+
+```matlab
+y(2, i) = -8 * g2Formula(t, tau) / tPulse^2 + 4 * g1Formula(t, tau, Hinf, H0) / tPulse + 8 * g2Formula(t - tPulse, tau) / tPulse^2 + 4 * g1Formula(t - tPulse, tau, Hinf, H0) / tPulse;
+```
 
 ## Часто задаваемые вопросы
 

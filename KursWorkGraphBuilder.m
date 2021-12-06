@@ -493,6 +493,37 @@ ylabel('g_1(t), мс');
 title('g_1');
 xlim([x(1), x(end)]);
 
+clear x y distToRightBoundary
+clear prefCalcExp
+
+% Uвх и Uвых
+
+distToRightBoundary = (tPulse + 5 * tau) * 1000;
+
+figure
+x = (0:distToRightBoundary / accuracyOfGraphs:distToRightBoundary);
+y = zeros(2, length(x));
+for i = 1:length(x)
+    t = x(i) / 1000;
+
+    y(1, i) = -8 * s2Formula(t) / tPulse^2 + 4 * s1Formula(t) / tPulse + 8 * s2Formula(t - tPulse) / tPulse^2 + 4 * s1Formula(t - tPulse) / tPulse;
+
+    y(2, i) = -8 * g2Formula(t, tau) / tPulse^2 + 4 * g1Formula(t, tau, Hinf, H0) / tPulse + 8 * g2Formula(t - tPulse, tau) / tPulse^2 + 4 * g1Formula(t - tPulse, tau, Hinf, H0) / tPulse;
+end
+
+subplot(2, 1, 1);
+plot(x, y(1, :)), grid
+xlabel('t, мс');
+ylabel('U_{вх}(t), В');
+title('Сигнал на входе цепи');
+
+
+subplot(2, 1, 2);
+plot(x, y(2, :)), grid
+xlabel('t, мс');
+ylabel('U_{вых}(t), В');
+title('Сигнал на выходе цепи');
+
 clear
 end
 
@@ -558,6 +589,38 @@ end
 function r = rFormula(t, tPulse)
 %Формула требуется для подсчета пункта 5
 r = 8 * tPulse / 15 * (1 - 5 * (t / tPulse)^2 + 5 * (abs(t) / tPulse)^3 - (abs(t) / tPulse)^5) * rect(t / (2 * tPulse));
+end
+
+function r = s1Formula(t)
+if (t < 0)
+    r = 0;
+else
+    r = t;
+end
+end
+
+function r = s2Formula(t)
+if (t < 0)
+    r = 0;
+else
+    r = 0.5 * t^2;
+end
+end
+
+function r = g1Formula(t, tau, Hinf, H0)
+if (t < 0)
+    r = 0;
+else
+    r = H0 * t - (H0 - Hinf) * tau * (1 - exp(-t / tau));
+end
+end
+
+function r = g2Formula(t, tau)
+if (t < 0)
+    r = 0;
+else
+    r = 0.25 * t^2 - 0.5 * tau * t + 0.5 * tau^2 * (1 - exp(-t / tau));
+end
 end
 
 %% Системные функции (не влезай убьет!)
