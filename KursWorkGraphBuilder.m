@@ -408,6 +408,35 @@ tau = 10 * t1; % тау в цепи
 H0 = 0.5;
 Hinf = 0;
 distToLeftAndRightBoundaries = 0.5;
+
+% АЧХ и ФЧХ
+figure
+x = (-distToLeftAndRightBoundaries:distToLeftAndRightBoundaries / accuracyOfGraphs:distToLeftAndRightBoundaries);
+y = zeros(2, length(x));
+for i = 1:length(x)
+    w = x(i) * 1000;
+
+    prefCalcExp = (w * tau)^2;
+    y(1, i) = sqrt((H0^2 + Hinf^2 * prefCalcExp) / (1 + prefCalcExp));
+
+    prefCalcExp = w * tau;
+    y(2, i) = atan(Hinf * prefCalcExp / H0) - atan(prefCalcExp);
+end
+
+subplot(2, 1, 1);
+plot(x, y(1, :)), grid
+xlabel('\omega, рад/мс');
+ylabel('|H(\omega)|');
+title('АЧХ');
+
+
+subplot(2, 1, 2);
+plot(x, y(2, :)), grid
+xlabel('\omega, рад/мс');
+ylabel('\phi_H(\omega), рад');
+title('ФЧХ');
+
+clear x y distToLeftAndRightBoundaries
 end
 
 %% Формулы
