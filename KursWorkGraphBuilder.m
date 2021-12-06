@@ -365,6 +365,8 @@ hold on
 plot(x, y(2, :), '--', 'Color', [1, 0, 0])
 xlabel('\tau, мс');
 ylabel('В');
+set(gca, 'XTick', [])
+legend({'S_1(t)', 'S_2(t-\tau)'}, 'Location', 'northwest')
 title('К расчету АКФ');
 % АКФ сигнала
 figure
