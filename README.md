@@ -165,6 +165,13 @@ Hinf = 0;
 distToLeftAndRightBoundaries = 0.5;
 ```
 
+Присвойте переменной `distToRightBoundary` формулу из курсовой или собственное значение для правой границы графика.
+
+```matlab
+distToRightBoundary = 5 * tau * 1000;
+```
+
+
 
 ## Часто задаваемые вопросы
 

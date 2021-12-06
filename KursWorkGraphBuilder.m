@@ -437,6 +437,63 @@ ylabel('\phi_H(\omega), рад');
 title('ФЧХ');
 
 clear x y distToLeftAndRightBoundaries
+% ИХ, ПХ, g1
+
+distToRightBoundary = 5 * tau * 1000;
+
+figure
+x = (0:distToRightBoundary / accuracyOfGraphs:distToRightBoundary);
+y = zeros(3, length(x));
+
+for i = 1:length(x)
+    t = x(i) / 1000;
+
+    prefCalcExp = exp(-t / tau);
+
+    y(1, i) = (H0 - Hinf) * prefCalcExp / tau;
+
+    y(2, i) = (Hinf + (H0 - Hinf) * (1 - prefCalcExp));
+
+    y(3, i) = (H0 * t - (H0 - Hinf) * tau * (1 - prefCalcExp)) * 1000;
+end
+
+subplot(3, 1, 1);
+plot(x, y(1, :)), grid
+% Начало блока кода для добавления дельта функций в конкретных точках для
+% ИХ
+% line([2, 2], [0, 40]);
+% line(2, 40, 'marker', 'o');
+% Конец блока кода для добавления дельта функций
+xlabel('h(t), мс^-1');
+ylabel('t, мс');
+title('ИХ');
+xlim([x(1), x(end)]);
+
+subplot(3, 1, 2);
+plot(x, y(2, :)), grid
+% Начало блока кода для добавления дельта функций в конкретных точках для
+% ПХ
+% line([2, 2], [0, 40]);
+% line(2, 40, 'marker', 'o');
+% Конец блока кода для добавления дельта функций
+xlabel('t, мс');
+ylabel('g(t)');
+title('ПХ');
+xlim([x(1), x(end)]);
+
+subplot(3, 1, 3);
+plot(x, y(3, :)), grid
+% Начало блока кода для добавления дельта функций в конкретных точках для
+% g1
+% line([2, 2], [0, 40]);
+% line(2, 40, 'marker', 'o');
+% Конец блока кода для добавления дельта функций
+xlabel('t, мс');
+ylabel('g_1(t), мс');
+title('g_1');
+xlim([x(1), x(end)]);
+
+clear
 end
 
 %% Формулы
