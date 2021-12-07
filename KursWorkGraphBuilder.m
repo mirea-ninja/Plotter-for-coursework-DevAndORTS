@@ -1,8 +1,9 @@
 function KursWorkGraphBuilder()
 
 %% Графопостроитель для курсовой работы по <Разработка и эксплуатация радиотелеметрических систем>
+t1 = 2 / 1000; % t1 из задания
 
-tPulse = 4 / 1000; % Длительность импульса (тау импульса)
+tPulse = 2 * t1; % Длительность импульса (тау импульса)
 accuracyOfGraphs = 300; % Точность графиков (чем больше число, тем дольше построение и плавнее графики)
 
 %% 1 пункт
@@ -400,6 +401,130 @@ xlabel('\tau, мс');
 ylabel('R_u(\tau), мДж');
 title('АКФ радиоимпульса');
 xlim([x(1), x(end)]);
+
+%% 6 пункт
+
+tau = 10 * t1; % тау в цепи
+H0 = 0.5;
+Hinf = 0;
+distToLeftAndRightBoundaries = 0.5;
+
+% АЧХ и ФЧХ
+figure
+x = (-distToLeftAndRightBoundaries:distToLeftAndRightBoundaries / accuracyOfGraphs:distToLeftAndRightBoundaries);
+y = zeros(2, length(x));
+for i = 1:length(x)
+    w = x(i) * 1000;
+
+    prefCalcExp = (w * tau)^2;
+    y(1, i) = sqrt((H0^2 + Hinf^2 * prefCalcExp) / (1 + prefCalcExp));
+
+    prefCalcExp = w * tau;
+    y(2, i) = atan(Hinf * prefCalcExp / H0) - atan(prefCalcExp);
+end
+
+subplot(2, 1, 1);
+plot(x, y(1, :)), grid
+xlabel('\omega, рад/мс');
+ylabel('|H(\omega)|');
+title('АЧХ');
+
+
+subplot(2, 1, 2);
+plot(x, y(2, :)), grid
+xlabel('\omega, рад/мс');
+ylabel('\phi_H(\omega), рад');
+title('ФЧХ');
+
+clear x y distToLeftAndRightBoundaries
+% ИХ, ПХ, g1
+
+distToRightBoundary = 5 * tau * 1000;
+
+figure
+x = (0:distToRightBoundary / accuracyOfGraphs:distToRightBoundary);
+y = zeros(3, length(x));
+
+for i = 1:length(x)
+    t = x(i) / 1000;
+
+    prefCalcExp = exp(-t / tau);
+
+    y(1, i) = (H0 - Hinf) * prefCalcExp / tau;
+
+    y(2, i) = (Hinf + (H0 - Hinf) * (1 - prefCalcExp));
+
+    y(3, i) = (H0 * t - (H0 - Hinf) * tau * (1 - prefCalcExp)) * 1000;
+end
+
+subplot(3, 1, 1);
+plot(x, y(1, :)), grid
+% Начало блока кода для добавления дельта функций в конкретных точках для
+% ИХ
+% line([2, 2], [0, 40]);
+% line(2, 40, 'marker', 'o');
+% Конец блока кода для добавления дельта функций
+xlabel('t, мс');
+ylabel('h(t), мс^-1');
+title('ИХ');
+xlim([x(1), x(end)]);
+
+subplot(3, 1, 2);
+plot(x, y(2, :)), grid
+% Начало блока кода для добавления дельта функций в конкретных точках для
+% ПХ
+% line([2, 2], [0, 40]);
+% line(2, 40, 'marker', 'o');
+% Конец блока кода для добавления дельта функций
+xlabel('t, мс');
+ylabel('g(t)');
+title('ПХ');
+xlim([x(1), x(end)]);
+
+subplot(3, 1, 3);
+plot(x, y(3, :)), grid
+% Начало блока кода для добавления дельта функций в конкретных точках для
+% g1
+% line([2, 2], [0, 40]);
+% line(2, 40, 'marker', 'o');
+% Конец блока кода для добавления дельта функций
+xlabel('t, мс');
+ylabel('g_1(t), мс');
+title('g_1');
+xlim([x(1), x(end)]);
+
+clear x y distToRightBoundary
+clear prefCalcExp
+
+% Uвх и Uвых
+
+distToRightBoundary = (tPulse + 5 * tau) * 1000;
+
+figure
+x = (0:distToRightBoundary / accuracyOfGraphs:distToRightBoundary);
+y = zeros(2, length(x));
+for i = 1:length(x)
+    t = x(i) / 1000;
+
+    y(1, i) = -8 * s2Formula(t) / tPulse^2 + 4 * s1Formula(t) / tPulse + 8 * s2Formula(t - tPulse) / tPulse^2 + 4 * s1Formula(t - tPulse) / tPulse;
+
+    y(2, i) = -8 * g2Formula(t, tau) / tPulse^2 + 4 * g1Formula(t, tau, Hinf, H0) / tPulse + 8 * g2Formula(t - tPulse, tau) / tPulse^2 + 4 * g1Formula(t - tPulse, tau, Hinf, H0) / tPulse;
+end
+
+subplot(2, 1, 1);
+plot(x, y(1, :)), grid
+xlabel('t, мс');
+ylabel('U_{вх}(t), В');
+title('Сигнал на входе цепи');
+
+
+subplot(2, 1, 2);
+plot(x, y(2, :)), grid
+xlabel('t, мс');
+ylabel('U_{вых}(t), В');
+title('Сигнал на выходе цепи');
+
+clear
 end
 
 %% Формулы
@@ -464,6 +589,38 @@ end
 function r = rFormula(t, tPulse)
 %Формула требуется для подсчета пункта 5
 r = 8 * tPulse / 15 * (1 - 5 * (t / tPulse)^2 + 5 * (abs(t) / tPulse)^3 - (abs(t) / tPulse)^5) * rect(t / (2 * tPulse));
+end
+
+function r = s1Formula(t)
+if (t < 0)
+    r = 0;
+else
+    r = t;
+end
+end
+
+function r = s2Formula(t)
+if (t < 0)
+    r = 0;
+else
+    r = 0.5 * t^2;
+end
+end
+
+function r = g1Formula(t, tau, Hinf, H0)
+if (t < 0)
+    r = 0;
+else
+    r = H0 * t - (H0 - Hinf) * tau * (1 - exp(-t / tau));
+end
+end
+
+function r = g2Formula(t, tau)
+if (t < 0)
+    r = 0;
+else
+    r = 0.25 * t^2 - 0.5 * tau * t + 0.5 * tau^2 * (1 - exp(-t / tau));
+end
 end
 
 %% Системные функции (не влезай убьет!)
